@@ -1,0 +1,5 @@
+# OS cruft
+.DS_Store
+
+# Each app (backend/, admin/, website/) has its own .gitignore for
+# node_modules, build output, and .env files.

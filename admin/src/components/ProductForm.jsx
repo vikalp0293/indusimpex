@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import Card from './ui/Card.jsx';
+import Button from './ui/Button.jsx';
+import { Field, inputClasses, textareaClasses } from './ui/Field.jsx';
 
 const emptyProduct = {
   name: '',
@@ -85,168 +88,157 @@ export default function ProductForm({ product, onSubmit, onCancel, submitting })
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 12,
-        border: '1px solid #e5e4e7',
-        borderRadius: 8,
-        padding: 16,
-        marginBottom: 24,
-        maxWidth: 480,
-      }}
+    <Card
+      title={product ? 'Edit Product' : 'New Product'}
+      className="mb-6 max-w-2xl"
     >
-      <h2 style={{ fontSize: 18, margin: 0 }}>{product ? 'Edit Product' : 'New Product'}</h2>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {errors.length > 0 && (
+          <ul className="list-disc rounded-lg bg-red-50 py-3 pl-8 pr-3 text-sm text-red-700">
+            {errors.map((e, i) => (
+              <li key={i}>{e}</li>
+            ))}
+          </ul>
+        )}
 
-      {errors.length > 0 && (
-        <ul style={{ color: 'crimson', margin: 0, paddingLeft: 20 }}>
-          {errors.map((e, i) => (
-            <li key={i}>{e}</li>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="Name">
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => setField('name', e.target.value)}
+              required
+              className={inputClasses}
+            />
+          </Field>
+
+          <Field label="Category" hint="e.g. Plates / Cups / Cutlery">
+            <input
+              type="text"
+              value={form.category}
+              onChange={(e) => setField('category', e.target.value)}
+              placeholder="Plates"
+              className={inputClasses}
+            />
+          </Field>
+        </div>
+
+        <Field label="Slug" hint="Optional — auto-generated from name if left blank">
+          <input
+            type="text"
+            value={form.slug}
+            onChange={(e) => setField('slug', e.target.value)}
+            placeholder="areca-leaf-plate-round"
+            className={inputClasses}
+          />
+        </Field>
+
+        <Field label="Description">
+          <textarea
+            value={form.description}
+            onChange={(e) => setField('description', e.target.value)}
+            rows={3}
+            className={textareaClasses}
+          />
+        </Field>
+
+        <Field label="Material Specs">
+          <textarea
+            value={form.material_specs}
+            onChange={(e) => setField('material_specs', e.target.value)}
+            rows={2}
+            className={textareaClasses}
+          />
+        </Field>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="HSN Code">
+            <input
+              type="text"
+              value={form.hsn_code}
+              onChange={(e) => setField('hsn_code', e.target.value)}
+              className={inputClasses}
+            />
+          </Field>
+
+          <Field label="MOQ Notes">
+            <input
+              type="text"
+              value={form.moq_notes}
+              onChange={(e) => setField('moq_notes', e.target.value)}
+              className={inputClasses}
+            />
+          </Field>
+        </div>
+
+        <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+          <input
+            type="checkbox"
+            checked={form.is_active}
+            onChange={(e) => setField('is_active', e.target.checked)}
+            className="h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600"
+          />
+          Active (visible on the public site)
+        </label>
+
+        <fieldset className="rounded-lg border border-slate-200 p-4">
+          <legend className="px-1 text-sm font-semibold text-slate-700">Images</legend>
+          {form.images.map((img, i) => (
+            <div key={i} className="mb-2 flex gap-2">
+              <input
+                type="text"
+                value={img.image_path}
+                onChange={(e) => updateImage(i, e.target.value)}
+                placeholder="/uploads/product-1.jpg"
+                className={`${inputClasses} flex-1`}
+              />
+              <Button size="sm" variant="danger" onClick={() => removeImage(i)}>
+                Remove
+              </Button>
+            </div>
           ))}
-        </ul>
-      )}
+          <Button size="sm" onClick={addImage} className="mt-1">
+            Add image path
+          </Button>
+        </fieldset>
 
-      <label>
-        Name
-        <input
-          type="text"
-          value={form.name}
-          onChange={(e) => setField('name', e.target.value)}
-          required
-          style={{ display: 'block', width: '100%' }}
-        />
-      </label>
+        <fieldset className="rounded-lg border border-slate-200 p-4">
+          <legend className="px-1 text-sm font-semibold text-slate-700">Variants</legend>
+          {form.variants.map((v, i) => (
+            <div key={i} className="mb-2 flex gap-2">
+              <input
+                type="text"
+                value={v.size}
+                onChange={(e) => updateVariant(i, 'size', e.target.value)}
+                placeholder="Size (e.g. 10 inch)"
+                className={`${inputClasses} flex-1`}
+              />
+              <input
+                type="text"
+                value={v.shape}
+                onChange={(e) => updateVariant(i, 'shape', e.target.value)}
+                placeholder="Shape (e.g. round)"
+                className={`${inputClasses} flex-1`}
+              />
+              <Button size="sm" variant="danger" onClick={() => removeVariant(i)}>
+                Remove
+              </Button>
+            </div>
+          ))}
+          <Button size="sm" onClick={addVariant} className="mt-1">
+            Add variant
+          </Button>
+        </fieldset>
 
-      <label>
-        Slug (optional — auto-generated from name if blank)
-        <input
-          type="text"
-          value={form.slug}
-          onChange={(e) => setField('slug', e.target.value)}
-          placeholder="areca-leaf-plate-round"
-          style={{ display: 'block', width: '100%' }}
-        />
-      </label>
-
-      <label>
-        Category
-        <input
-          type="text"
-          value={form.category}
-          onChange={(e) => setField('category', e.target.value)}
-          placeholder="Plates / Cups / Cutlery"
-          style={{ display: 'block', width: '100%' }}
-        />
-      </label>
-
-      <label>
-        Description
-        <textarea
-          value={form.description}
-          onChange={(e) => setField('description', e.target.value)}
-          rows={3}
-          style={{ display: 'block', width: '100%' }}
-        />
-      </label>
-
-      <label>
-        Material Specs
-        <textarea
-          value={form.material_specs}
-          onChange={(e) => setField('material_specs', e.target.value)}
-          rows={2}
-          style={{ display: 'block', width: '100%' }}
-        />
-      </label>
-
-      <label>
-        HSN Code
-        <input
-          type="text"
-          value={form.hsn_code}
-          onChange={(e) => setField('hsn_code', e.target.value)}
-          style={{ display: 'block', width: '100%' }}
-        />
-      </label>
-
-      <label>
-        MOQ Notes
-        <input
-          type="text"
-          value={form.moq_notes}
-          onChange={(e) => setField('moq_notes', e.target.value)}
-          style={{ display: 'block', width: '100%' }}
-        />
-      </label>
-
-      <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <input
-          type="checkbox"
-          checked={form.is_active}
-          onChange={(e) => setField('is_active', e.target.checked)}
-        />
-        Active (visible on the public site)
-      </label>
-
-      <div>
-        <p style={{ margin: '0 0 8px', fontWeight: 600 }}>Images</p>
-        {form.images.map((img, i) => (
-          <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-            <input
-              type="text"
-              value={img.image_path}
-              onChange={(e) => updateImage(i, e.target.value)}
-              placeholder="/uploads/product-1.jpg"
-              style={{ flex: 1 }}
-            />
-            <button type="button" onClick={() => removeImage(i)}>
-              Remove
-            </button>
-          </div>
-        ))}
-        <button type="button" onClick={addImage}>
-          Add image path
-        </button>
-      </div>
-
-      <div>
-        <p style={{ margin: '0 0 8px', fontWeight: 600 }}>Variants</p>
-        {form.variants.map((v, i) => (
-          <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-            <input
-              type="text"
-              value={v.size}
-              onChange={(e) => updateVariant(i, 'size', e.target.value)}
-              placeholder="Size (e.g. 10 inch)"
-              style={{ flex: 1 }}
-            />
-            <input
-              type="text"
-              value={v.shape}
-              onChange={(e) => updateVariant(i, 'shape', e.target.value)}
-              placeholder="Shape (e.g. round)"
-              style={{ flex: 1 }}
-            />
-            <button type="button" onClick={() => removeVariant(i)}>
-              Remove
-            </button>
-          </div>
-        ))}
-        <button type="button" onClick={addVariant}>
-          Add variant
-        </button>
-      </div>
-
-      <div style={{ display: 'flex', gap: 8 }}>
-        <button type="submit" disabled={submitting}>
-          {submitting ? 'Saving…' : 'Save'}
-        </button>
-        <button type="button" onClick={onCancel} disabled={submitting}>
-          Cancel
-        </button>
-      </div>
-    </form>
+        <div className="flex gap-2 pt-2">
+          <Button type="submit" variant="primary" disabled={submitting}>
+            {submitting ? 'Saving…' : 'Save'}
+          </Button>
+          <Button type="button" onClick={onCancel} disabled={submitting}>
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </Card>
   );
 }

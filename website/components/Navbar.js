@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import BrandLogo from "./BrandLogo";
 
 const NAV_LINKS = [
   { href: "/products", label: "Products" },
@@ -15,20 +16,29 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="relative border-b border-black/10">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link href="/" className="font-semibold" onClick={() => setOpen(false)}>
-          Indus Impex
+    <header className="sticky top-0 z-50 border-b border-black/10 bg-white/95 backdrop-blur">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+        <Link href="/" className="shrink-0" onClick={() => setOpen(false)}>
+          <BrandLogo />
         </Link>
 
         {/* Tablet and up: full horizontal nav */}
-        <ul className="hidden gap-6 text-sm md:flex">
+        <ul className="hidden items-center gap-7 text-sm font-medium text-black/70 md:flex">
           {NAV_LINKS.map((link) => (
             <li key={link.href}>
-              <Link href={link.href}>{link.label}</Link>
+              <Link href={link.href} className="transition-colors hover:text-teal-800">
+                {link.label}
+              </Link>
             </li>
           ))}
         </ul>
+
+        <Link
+          href="/contact"
+          className="hidden shrink-0 rounded-full bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-800 md:inline-flex"
+        >
+          Request a Quote
+        </Link>
 
         {/* Mobile: hamburger toggle */}
         <button
@@ -58,6 +68,15 @@ export default function Navbar() {
               </Link>
             </li>
           ))}
+          <li className="pt-2">
+            <Link
+              href="/contact"
+              className="inline-flex rounded-full bg-teal-700 px-5 py-2.5 font-semibold text-white"
+              onClick={() => setOpen(false)}
+            >
+              Request a Quote
+            </Link>
+          </li>
         </ul>
       )}
     </header>

@@ -15,7 +15,7 @@ async function getProducts() {
 }
 
 export default async function ContactPage({ searchParams }) {
-  const { product, name } = await searchParams;
+  const { product, name, email } = await searchParams;
   const products = await getProducts();
 
   return (
@@ -30,7 +30,7 @@ export default async function ContactPage({ searchParams }) {
       </AnimatedSection>
 
       <AnimatedSection as="div" className="mt-10">
-        <ContactForm products={products} initialProductSlug={product} />
+        <ContactForm products={products} initialProductSlug={product} initialEmail={email} />
       </AnimatedSection>
     </div>
   );

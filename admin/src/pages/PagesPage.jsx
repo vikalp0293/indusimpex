@@ -1,16 +1,79 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
+import HomePageForm from '../components/HomePageForm.jsx';
+import AboutPageForm from '../components/AboutPageForm.jsx';
+import ExportInfoPageForm from '../components/ExportInfoPageForm.jsx';
+import GalleryPageForm from '../components/GalleryPageForm.jsx';
+import Button from '../components/ui/Button.jsx';
+
+// Default shape for each page key — mirrors exactly what the corresponding
+// website/app/**/page.js expects as props, so every field always has
+// somewhere to render even before anything has been saved for that page.
+const DEFAULTS = {
+  home: {
+    hero: {
+      headline: '',
+      subtext: '',
+      primaryCtaLabel: 'View Products',
+      primaryCtaHref: '/products',
+      secondaryCtaLabel: 'Request a Quote',
+      secondaryCtaHref: '/contact',
+    },
+    stats: { items: [], note: '' },
+    story: { eyebrow: '', heading: '', body: '', ctaLabel: '', ctaHref: '/about' },
+    mission: { heading: '', body: '', foundingYear: '' },
+    trustBadges: [],
+    whySource: [],
+    exploreTiles: { heading: '', tiles: [] },
+    newsletter: { heading: '', body: '', ctaLabel: 'Request a Quote' },
+  },
+  about: {
+    intro: '',
+    manufacturing: { heading: '', body: '' },
+    certifications: [],
+    sustainability: { heading: '', body: '' },
+  },
+  'export-info': {
+    intro: '',
+    shippingTerms: [],
+    portsShippedFrom: '',
+    leadTimes: '',
+    samplePolicy: '',
+    paymentTerms: '',
+  },
+  gallery: { intro: '', items: [] },
+};
 
 const PAGE_KEYS = [
-  { key: 'home', label: 'Home' },
-  { key: 'about', label: 'About' },
-  { key: 'export-info', label: 'Export Info' },
-  { key: 'gallery', label: 'Gallery' },
+  { key: 'home', label: 'Home', Form: HomePageForm },
+  { key: 'about', label: 'About', Form: AboutPageForm },
+  { key: 'export-info', label: 'Export Info', Form: ExportInfoPageForm },
+  { key: 'gallery', label: 'Gallery', Form: GalleryPageForm },
 ];
+
+function isPlainObject(v) {
+  return v && typeof v === 'object' && !Array.isArray(v);
+}
+
+// Shallow-merges saved content over the default shape one level deep, so a
+// partially-filled record (or a brand new one) never leaves a form field
+// reading `undefined`.
+function withDefaults(defaults, content) {
+  const result = structuredClone(defaults);
+  for (const key of Object.keys(defaults)) {
+    if (content && content[key] !== undefined) {
+      result[key] =
+        isPlainObject(defaults[key]) && isPlainObject(content[key])
+          ? { ...defaults[key], ...content[key] }
+          : content[key];
+    }
+  }
+  return result;
+}
 
 export default function PagesPage() {
   const [activeKey, setActiveKey] = useState(PAGE_KEYS[0].key);
-  const [draft, setDraft] = useState('{}');
+  const [content, setContent] = useState(DEFAULTS[PAGE_KEYS[0].key]);
   const [updatedAt, setUpdatedAt] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,13 +90,12 @@ export default function PagesPage() {
       try {
         const page = await api.get(`/api/pages/${activeKey}`);
         if (cancelled) return;
-        setDraft(JSON.stringify(page.content, null, 2));
+        setContent(withDefaults(DEFAULTS[activeKey], page.content));
         setUpdatedAt(page.updated_at);
       } catch (err) {
         if (cancelled) return;
         if (err.status === 404) {
-          // No content saved for this page yet — start from an empty object.
-          setDraft('{}');
+          setContent(structuredClone(DEFAULTS[activeKey]));
           setUpdatedAt(null);
         } else {
           setError(err.message);
@@ -52,19 +114,10 @@ export default function PagesPage() {
   const handleSave = async () => {
     setError(null);
     setSaved(false);
-
-    let parsed;
-    try {
-      parsed = JSON.parse(draft);
-    } catch {
-      setError('Content is not valid JSON — fix the syntax and try again.');
-      return;
-    }
-
     setSaving(true);
     try {
-      const page = await api.put(`/api/pages/${activeKey}`, { content: parsed });
-      setDraft(JSON.stringify(page.content, null, 2));
+      const page = await api.put(`/api/pages/${activeKey}`, { content });
+      setContent(withDefaults(DEFAULTS[activeKey], page.content));
       setUpdatedAt(page.updated_at);
       setSaved(true);
     } catch (err) {
@@ -74,21 +127,33 @@ export default function PagesPage() {
     }
   };
 
+  const ActiveForm = PAGE_KEYS.find((p) => p.key === activeKey).Form;
+
   return (
     <div>
-      <h1>Pages</h1>
-      <p style={{ color: '#666' }}>
-        Edit the JSON content served to the public website for each page. Changes take effect
-        immediately — no redeploy needed.
+      <p className="mb-6 max-w-2xl text-sm text-slate-500">
+        Edit the content shown on the public website. Changes take effect immediately after
+        saving — no redeploy needed.
       </p>
 
-      <div style={{ display: 'flex', gap: 8, margin: '16px 0' }}>
+      <div className="mb-6 flex gap-1 border-b border-slate-200">
         {PAGE_KEYS.map(({ key, label }) => (
           <button
             key={key}
             type="button"
-            onClick={() => setActiveKey(key)}
-            style={{ fontWeight: activeKey === key ? 'bold' : 'normal' }}
+            onClick={() => {
+              // Reset content to this tab's shape synchronously (in the same
+              // batch as activeKey) so the form never briefly renders with
+              // the previous tab's content shape before the fetch resolves.
+              setActiveKey(key);
+              setContent(structuredClone(DEFAULTS[key]));
+              setLoading(true);
+            }}
+            className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+              activeKey === key
+                ? 'border-teal-700 text-teal-800'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
           >
             {label}
           </button>
@@ -96,36 +161,25 @@ export default function PagesPage() {
       </div>
 
       {loading ? (
-        <p>Loading…</p>
+        <p className="text-sm text-slate-500">Loading…</p>
       ) : (
-        <>
+        <div className="max-w-2xl">
           {updatedAt && (
-            <p style={{ color: '#666', fontSize: 13 }}>
+            <p className="mb-4 text-xs text-slate-400">
               Last updated: {new Date(updatedAt).toLocaleString()}
             </p>
           )}
-          <textarea
-            value={draft}
-            onChange={(e) => {
-              setDraft(e.target.value);
-              setSaved(false);
-            }}
-            rows={24}
-            spellCheck={false}
-            style={{
-              width: '100%',
-              maxWidth: 720,
-              fontFamily: 'monospace',
-              fontSize: 13,
-              display: 'block',
-            }}
-          />
-          {error && <p style={{ color: 'crimson' }}>{error}</p>}
-          {saved && <p style={{ color: 'seagreen' }}>Saved.</p>}
-          <button type="button" onClick={handleSave} disabled={saving} style={{ marginTop: 8 }}>
-            {saving ? 'Saving…' : 'Save'}
-          </button>
-        </>
+
+          <ActiveForm value={content} onChange={setContent} />
+
+          <div className="sticky bottom-0 mt-6 flex items-center gap-3 border-t border-slate-200 bg-slate-50/95 py-4 backdrop-blur">
+            <Button type="button" variant="primary" onClick={handleSave} disabled={saving}>
+              {saving ? 'Saving…' : 'Save'}
+            </Button>
+            {error && <p className="text-sm text-red-600">{error}</p>}
+            {saved && <p className="text-sm text-emerald-600">Saved.</p>}
+          </div>
+        </div>
       )}
     </div>
   );

@@ -5,11 +5,11 @@ import { apiPost } from "@/lib/api";
 
 const SHIPPING_TERMS = ["FOB", "CIF", "EXW", "Not sure yet"];
 
-export default function ContactForm({ products, initialProductSlug }) {
+export default function ContactForm({ products, initialProductSlug, initialEmail = "" }) {
   const [form, setForm] = useState({
     name: "",
     company: "",
-    email: "",
+    email: initialEmail,
     phone: "",
     product_interest: (() => {
       const match = products.find((p) => p.slug === initialProductSlug);
@@ -77,7 +77,7 @@ export default function ContactForm({ products, initialProductSlug }) {
             required
             value={form.name}
             onChange={(e) => setField("name", e.target.value)}
-            className="rounded-lg border border-black/15 px-3 py-2 font-normal"
+            className="rounded-lg border border-black/15 bg-white px-3 py-2 font-normal"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm font-medium">
@@ -86,7 +86,7 @@ export default function ContactForm({ products, initialProductSlug }) {
             type="text"
             value={form.company}
             onChange={(e) => setField("company", e.target.value)}
-            className="rounded-lg border border-black/15 px-3 py-2 font-normal"
+            className="rounded-lg border border-black/15 bg-white px-3 py-2 font-normal"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm font-medium">
@@ -96,7 +96,7 @@ export default function ContactForm({ products, initialProductSlug }) {
             required
             value={form.email}
             onChange={(e) => setField("email", e.target.value)}
-            className="rounded-lg border border-black/15 px-3 py-2 font-normal"
+            className="rounded-lg border border-black/15 bg-white px-3 py-2 font-normal"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm font-medium">
@@ -105,7 +105,7 @@ export default function ContactForm({ products, initialProductSlug }) {
             type="tel"
             value={form.phone}
             onChange={(e) => setField("phone", e.target.value)}
-            className="rounded-lg border border-black/15 px-3 py-2 font-normal"
+            className="rounded-lg border border-black/15 bg-white px-3 py-2 font-normal"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm font-medium">
@@ -113,7 +113,7 @@ export default function ContactForm({ products, initialProductSlug }) {
           <select
             value={form.product_interest}
             onChange={(e) => setField("product_interest", e.target.value)}
-            className="rounded-lg border border-black/15 px-3 py-2 font-normal"
+            className="rounded-lg border border-black/15 bg-white px-3 py-2 font-normal"
           >
             <option value="">Select a product (optional)</option>
             {products.map((p) => (
@@ -130,7 +130,7 @@ export default function ContactForm({ products, initialProductSlug }) {
             placeholder="e.g. 10,000 units"
             value={form.quantity}
             onChange={(e) => setField("quantity", e.target.value)}
-            className="rounded-lg border border-black/15 px-3 py-2 font-normal"
+            className="rounded-lg border border-black/15 bg-white px-3 py-2 font-normal"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm font-medium">
@@ -139,7 +139,7 @@ export default function ContactForm({ products, initialProductSlug }) {
             type="text"
             value={form.destination_country}
             onChange={(e) => setField("destination_country", e.target.value)}
-            className="rounded-lg border border-black/15 px-3 py-2 font-normal"
+            className="rounded-lg border border-black/15 bg-white px-3 py-2 font-normal"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm font-medium">
@@ -147,7 +147,7 @@ export default function ContactForm({ products, initialProductSlug }) {
           <select
             value={form.shipping_terms}
             onChange={(e) => setField("shipping_terms", e.target.value)}
-            className="rounded-lg border border-black/15 px-3 py-2 font-normal"
+            className="rounded-lg border border-black/15 bg-white px-3 py-2 font-normal"
           >
             <option value="">Select (optional)</option>
             {SHIPPING_TERMS.map((term) => (
@@ -165,7 +165,7 @@ export default function ContactForm({ products, initialProductSlug }) {
           rows={4}
           value={form.message}
           onChange={(e) => setField("message", e.target.value)}
-          className="rounded-lg border border-black/15 px-3 py-2 font-normal"
+          className="rounded-lg border border-black/15 bg-white px-3 py-2 font-normal"
         />
       </label>
 

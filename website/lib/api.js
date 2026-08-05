@@ -33,11 +33,15 @@ export async function apiPost(path, body) {
   return data;
 }
 
-// Images (product_images.image_path) are stored as backend-relative paths
-// (e.g. "/uploads/plate.jpg") and served by the backend, not by Next.js.
+// Images (product_images.image_path) are usually backend-relative paths
+// (e.g. "/uploads/plate.jpg") served by the backend — except "/images/…",
+// which is the convention for stand-in photography bundled with the
+// website itself (see website/public/images and /credits) rather than
+// something an admin uploaded.
 export function resolveImageUrl(path) {
   if (!path) return null;
   if (/^https?:\/\//.test(path)) return path;
+  if (path.startsWith('/images/')) return path;
   return `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
 }
 

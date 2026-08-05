@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { apiGet, resolveImageUrl } from "@/lib/api";
 import AnimatedSection from "@/components/AnimatedSection";
 import PlaceholderImage from "@/components/PlaceholderImage";
+import ProductGrid from "@/components/ProductGrid";
+import { iconKeyForCategory } from "@/components/icons";
 
 async function getProduct(slug) {
   try {
@@ -13,6 +15,18 @@ async function getProduct(slug) {
   }
 }
 
+async function getRelatedProducts(product) {
+  if (!product.category) return [];
+  try {
+    const sameCategory = await apiGet(
+      `/api/products?category=${encodeURIComponent(product.category)}&is_active=true`
+    );
+    return sameCategory.filter((p) => p.id !== product.id).slice(0, 3);
+  } catch {
+    return [];
+  }
+}
+
 export default async function ProductDetailPage({ params }) {
   const { slug } = await params;
   const product = await getProduct(slug);
@@ -20,6 +34,8 @@ export default async function ProductDetailPage({ params }) {
   if (!product) {
     notFound();
   }
+
+  const relatedProducts = await getRelatedProducts(product);
 
   const quoteHref = `/contact?product=${encodeURIComponent(
     product.slug
@@ -40,13 +56,18 @@ export default async function ProductDetailPage({ params }) {
               />
             ))
           ) : (
-            <PlaceholderImage label={product.name} aspect="aspect-square" className="col-span-2" />
+            <PlaceholderImage
+              label={product.name}
+              icon={iconKeyForCategory(product.category)}
+              aspect="aspect-square"
+              className="col-span-2"
+            />
           )}
         </div>
 
         <div>
           {product.category && (
-            <span className="w-fit rounded-full bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-800">
+            <span className="w-fit rounded-full bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-800">
               {product.category}
             </span>
           )}
@@ -109,6 +130,15 @@ export default async function ProductDetailPage({ params }) {
           </Link>
         </div>
       </AnimatedSection>
+
+      {relatedProducts.length > 0 && (
+        <AnimatedSection as="div" className="mt-20">
+          <h2 className="text-2xl font-semibold">Related Products</h2>
+          <div className="mt-8">
+            <ProductGrid products={relatedProducts} />
+          </div>
+        </AnimatedSection>
+      )}
     </div>
   );
 }

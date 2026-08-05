@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 import ProductForm from '../components/ProductForm.jsx';
+import Button from '../components/ui/Button.jsx';
+import Badge from '../components/ui/Badge.jsx';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -60,12 +62,12 @@ export default function ProductsPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>Products</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <p className="text-sm text-slate-500">{products.length} product{products.length === 1 ? '' : 's'}</p>
         {editing === null && (
-          <button type="button" onClick={() => setEditing('new')}>
+          <Button variant="primary" onClick={() => setEditing('new')}>
             New Product
-          </button>
+          </Button>
         )}
       </div>
 
@@ -85,48 +87,56 @@ export default function ProductsPage() {
         />
       )}
 
-      {loading && <p>Loading products…</p>}
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
+      {loading && <p className="text-sm text-slate-500">Loading products…</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
 
       {!loading && !error && (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ textAlign: 'left', borderBottom: '1px solid #e5e4e7' }}>
-              <th style={{ padding: 8 }}>Name</th>
-              <th style={{ padding: 8 }}>Slug</th>
-              <th style={{ padding: 8 }}>Category</th>
-              <th style={{ padding: 8 }}>HSN Code</th>
-              <th style={{ padding: 8 }}>Active</th>
-              <th style={{ padding: 8 }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.length === 0 && (
-              <tr>
-                <td colSpan={6} style={{ padding: 8, color: '#666' }}>
-                  No products yet.
-                </td>
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <th className="px-4 py-3">Name</th>
+                <th className="px-4 py-3">Slug</th>
+                <th className="px-4 py-3">Category</th>
+                <th className="px-4 py-3">HSN Code</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Actions</th>
               </tr>
-            )}
-            {products.map((product) => (
-              <tr key={product.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                <td style={{ padding: 8 }}>{product.name}</td>
-                <td style={{ padding: 8 }}>{product.slug}</td>
-                <td style={{ padding: 8 }}>{product.category}</td>
-                <td style={{ padding: 8 }}>{product.hsn_code}</td>
-                <td style={{ padding: 8 }}>{product.is_active ? 'Yes' : 'No'}</td>
-                <td style={{ padding: 8, display: 'flex', gap: 8 }}>
-                  <button type="button" onClick={() => setEditing(product)}>
-                    Edit
-                  </button>
-                  <button type="button" onClick={() => handleDelete(product)}>
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {products.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                    No products yet.
+                  </td>
+                </tr>
+              )}
+              {products.map((product) => (
+                <tr key={product.id} className="hover:bg-slate-50">
+                  <td className="px-4 py-3 font-medium text-slate-900">{product.name}</td>
+                  <td className="px-4 py-3 text-slate-500">{product.slug}</td>
+                  <td className="px-4 py-3 text-slate-500">{product.category}</td>
+                  <td className="px-4 py-3 text-slate-500">{product.hsn_code}</td>
+                  <td className="px-4 py-3">
+                    <Badge tone={product.is_active ? 'green' : 'slate'}>
+                      {product.is_active ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => setEditing(product)}>
+                        Edit
+                      </Button>
+                      <Button size="sm" variant="danger" onClick={() => handleDelete(product)}>
+                        Delete
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

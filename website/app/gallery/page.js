@@ -1,5 +1,7 @@
 import AnimatedSection from "@/components/AnimatedSection";
 import PlaceholderImage from "@/components/PlaceholderImage";
+import { iconKeyForGalleryItem } from "@/components/icons";
+import { resolveImageUrl } from "@/lib/api";
 import { getPageContent } from "@/lib/api";
 
 export const metadata = {
@@ -7,12 +9,9 @@ export const metadata = {
 };
 
 // Fallback copy — used only if the "gallery" row in the `pages` table
-// hasn't been created/edited yet. Real photography hasn't been supplied
-// yet (spec section 7) — captions are DB-backed, but the images themselves
-// stay placeholders until real photos are uploaded.
+// hasn't been created/edited yet.
 const GALLERY_FALLBACK = {
-  intro:
-    "Real photos of our production unit, packaging process, and product samples will replace these placeholders once supplied.",
+  intro: "A look at the raw material, the pressing process, and the finished tableware.",
   items: [],
 };
 
@@ -27,9 +26,25 @@ export default async function GalleryPage() {
       </AnimatedSection>
 
       <AnimatedSection as="div" className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3">
-        {content.items.map((label) => (
-          <PlaceholderImage key={label} label={label} aspect="aspect-square" />
-        ))}
+        {content.items.map((item) => {
+          const imageUrl = resolveImageUrl(item.image);
+          return imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={item.label}
+              src={imageUrl}
+              alt={item.label}
+              className="aspect-square w-full rounded-xl object-cover"
+            />
+          ) : (
+            <PlaceholderImage
+              key={item.label}
+              label={item.label}
+              icon={iconKeyForGalleryItem(item.label)}
+              aspect="aspect-square"
+            />
+          );
+        })}
       </AnimatedSection>
     </div>
   );

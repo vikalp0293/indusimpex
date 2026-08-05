@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
+import Badge from '../components/ui/Badge.jsx';
+import { inputClasses } from '../components/ui/Field.jsx';
 
 const STATUSES = ['new', 'read', 'responded'];
+const STATUS_TONE = { new: 'amber', read: 'teal', responded: 'green' };
 
 export default function InquiriesPage() {
   const [inquiries, setInquiries] = useState([]);
@@ -43,12 +46,17 @@ export default function InquiriesPage() {
 
   return (
     <div>
-      <h1>Inquiries</h1>
-
-      <div style={{ marginBottom: 16 }}>
-        <label>
-          Filter by status:{' '}
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+      <div className="mb-6 flex items-center justify-between">
+        <p className="text-sm text-slate-500">
+          {inquiries.length} inquir{inquiries.length === 1 ? 'y' : 'ies'}
+        </p>
+        <label className="flex items-center gap-2 text-sm text-slate-600">
+          Status
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className={`${inputClasses} w-auto`}
+          >
             <option value="">All</option>
             {STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -59,65 +67,71 @@ export default function InquiriesPage() {
         </label>
       </div>
 
-      {loading && <p>Loading inquiries…</p>}
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
+      {loading && <p className="text-sm text-slate-500">Loading inquiries…</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
 
       {!loading && !error && (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ textAlign: 'left', borderBottom: '1px solid #e5e4e7' }}>
-              <th style={{ padding: 8 }}>Received</th>
-              <th style={{ padding: 8 }}>Name / Company</th>
-              <th style={{ padding: 8 }}>Contact</th>
-              <th style={{ padding: 8 }}>Product</th>
-              <th style={{ padding: 8 }}>Quantity</th>
-              <th style={{ padding: 8 }}>Destination</th>
-              <th style={{ padding: 8 }}>Message</th>
-              <th style={{ padding: 8 }}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {inquiries.length === 0 && (
-              <tr>
-                <td colSpan={8} style={{ padding: 8, color: '#666' }}>
-                  No inquiries yet.
-                </td>
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <th className="whitespace-nowrap px-4 py-3">Received</th>
+                <th className="px-4 py-3">Name / Company</th>
+                <th className="px-4 py-3">Contact</th>
+                <th className="px-4 py-3">Product</th>
+                <th className="px-4 py-3">Quantity</th>
+                <th className="px-4 py-3">Destination</th>
+                <th className="px-4 py-3">Message</th>
+                <th className="px-4 py-3">Status</th>
               </tr>
-            )}
-            {inquiries.map((inquiry) => (
-              <tr key={inquiry.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                <td style={{ padding: 8, whiteSpace: 'nowrap' }}>
-                  {new Date(inquiry.created_at).toLocaleDateString()}
-                </td>
-                <td style={{ padding: 8 }}>
-                  {inquiry.name}
-                  {inquiry.company && <div style={{ color: '#666' }}>{inquiry.company}</div>}
-                </td>
-                <td style={{ padding: 8 }}>
-                  <div>{inquiry.email}</div>
-                  {inquiry.phone && <div style={{ color: '#666' }}>{inquiry.phone}</div>}
-                </td>
-                <td style={{ padding: 8 }}>{inquiry.product_name || '—'}</td>
-                <td style={{ padding: 8 }}>{inquiry.quantity || '—'}</td>
-                <td style={{ padding: 8 }}>{inquiry.destination_country || '—'}</td>
-                <td style={{ padding: 8, maxWidth: 240 }}>{inquiry.message || '—'}</td>
-                <td style={{ padding: 8 }}>
-                  <select
-                    value={inquiry.status}
-                    disabled={updatingId === inquiry.id}
-                    onChange={(e) => handleStatusChange(inquiry, e.target.value)}
-                  >
-                    {STATUSES.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {inquiries.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
+                    No inquiries yet.
+                  </td>
+                </tr>
+              )}
+              {inquiries.map((inquiry) => (
+                <tr key={inquiry.id} className="align-top hover:bg-slate-50">
+                  <td className="whitespace-nowrap px-4 py-3 text-slate-500">
+                    {new Date(inquiry.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="font-medium text-slate-900">{inquiry.name}</div>
+                    {inquiry.company && <div className="text-slate-500">{inquiry.company}</div>}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="text-slate-900">{inquiry.email}</div>
+                    {inquiry.phone && <div className="text-slate-500">{inquiry.phone}</div>}
+                  </td>
+                  <td className="px-4 py-3 text-slate-500">{inquiry.product_name || '—'}</td>
+                  <td className="px-4 py-3 text-slate-500">{inquiry.quantity || '—'}</td>
+                  <td className="px-4 py-3 text-slate-500">{inquiry.destination_country || '—'}</td>
+                  <td className="max-w-60 px-4 py-3 text-slate-500">{inquiry.message || '—'}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col items-start gap-1.5">
+                      <Badge tone={STATUS_TONE[inquiry.status]}>{inquiry.status}</Badge>
+                      <select
+                        value={inquiry.status}
+                        disabled={updatingId === inquiry.id}
+                        onChange={(e) => handleStatusChange(inquiry, e.target.value)}
+                        className={`${inputClasses} py-1 text-xs`}
+                      >
+                        {STATUSES.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

@@ -11,6 +11,7 @@ export default function AnimatedSection({
   className = "",
   delay = 0,
   as = "section",
+  ...rest
 }) {
   const MotionTag = motion[as] || motion.section;
 
@@ -21,6 +22,7 @@ export default function AnimatedSection({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.6, delay, ease: "easeOut" }}
+      {...rest}
     >
       {children}
     </MotionTag>

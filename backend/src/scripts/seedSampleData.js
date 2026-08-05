@@ -21,6 +21,7 @@ const PRODUCTS = [
       { size: '10 inch', shape: 'Round' },
       { size: '7 inch', shape: 'Round' },
     ],
+    images: [{ image_path: '/images/plate-round.jpg' }],
   },
   {
     name: 'Square Areca Leaf Plate',
@@ -30,6 +31,7 @@ const PRODUCTS = [
     hsn_code: '46021990',
     moq_notes: '5000 pcs per SKU',
     variants: [{ size: '9 inch', shape: 'Square' }],
+    images: [{ image_path: '/images/plate-square.jpg' }],
   },
   {
     name: 'Areca Leaf Bowl',
@@ -39,6 +41,7 @@ const PRODUCTS = [
     hsn_code: '46021990',
     moq_notes: '5000 pcs per SKU',
     variants: [{ size: '12 oz', shape: 'Round' }],
+    images: [{ image_path: '/images/plate-square.jpg' }],
   },
   {
     name: 'Compostable Paper Cup',
@@ -52,6 +55,7 @@ const PRODUCTS = [
       { size: '150ml', shape: null },
       { size: '250ml', shape: null },
     ],
+    images: [{ image_path: '/images/cup.png' }],
   },
   {
     name: 'Wooden Disposable Fork',
@@ -62,6 +66,32 @@ const PRODUCTS = [
     hsn_code: '44190090',
     moq_notes: '20000 pcs per SKU',
     variants: [{ size: '160mm', shape: null }],
+    images: [{ image_path: '/images/cutlery.jpg' }],
+  },
+  {
+    name: 'Biodegradable Paper Straws',
+    slug: 'biodegradable-paper-straws',
+    category: 'Cutlery',
+    description: 'Sturdy paper straws that hold up in cold and hot beverages alike, fully compostable.',
+    material_specs: 'FSC-sourced paper, food-safe non-toxic inks',
+    hsn_code: '48239019',
+    moq_notes: '50000 pcs per SKU',
+    variants: [
+      { size: '6mm x 200mm', shape: 'Regular' },
+      { size: '8mm x 200mm', shape: 'Jumbo' },
+    ],
+    images: [{ image_path: '/images/straws.jpg' }],
+  },
+  {
+    name: 'Wooden Coffee Stirrers',
+    slug: 'wooden-coffee-stirrers',
+    category: 'Cutlery',
+    description: 'Splinter-free birchwood stirrers for hot and cold beverages, compostable after use.',
+    material_specs: 'Birchwood',
+    hsn_code: '44190090',
+    moq_notes: '50000 pcs per SKU',
+    variants: [{ size: '140mm', shape: null }],
+    images: [{ image_path: '/images/stirrer.jpg' }],
   },
 ];
 
@@ -83,6 +113,14 @@ const PAGES = {
         { value: '3+', label: 'Product Categories' },
       ],
       note: 'Figures shown are placeholders pending confirmed company data.',
+    },
+    story: {
+      eyebrow: 'Our Process',
+      heading: 'Handcrafted From Naturally Fallen Leaves',
+      body:
+        'Areca leaves are collected after they fall from the palm on their own — no tree is ever cut. Each leaf is cleaned, heat-pressed into shape, and quality-checked by hand before packing, giving you tableware that is sturdy, food-safe, and fully biodegradable from source to shipment.',
+      ctaLabel: 'Learn More About Us',
+      ctaHref: '/about',
     },
     mission: {
       heading: 'Our Mission',
@@ -109,6 +147,41 @@ const PAGES = {
         body: 'Work directly with the source — no middlemen markups, and specifications you can actually verify.',
       },
     ],
+    exploreTiles: {
+      heading: 'Explore Indus Impex',
+      tiles: [
+        {
+          heading: 'Browse Our Products',
+          body: 'Plates, cups, and cutlery — all HSN-coded with MOQ guidance.',
+          href: '/products',
+        },
+        {
+          heading: 'Export Info',
+          body: 'FOB/CIF terms, shipping, samples, and payment — everything international buyers need.',
+          href: '/export-info',
+        },
+        {
+          heading: 'Our Sustainability Story',
+          body: 'See how naturally fallen areca leaves become export-ready tableware.',
+          href: '/about',
+        },
+        {
+          heading: 'Production Gallery',
+          body: 'A look at the raw material, the pressing process, and the finished product.',
+          href: '/gallery',
+        },
+        {
+          heading: 'Certifications & Trust',
+          body: 'What we hold today and what is pending confirmation — no overclaiming.',
+          href: '/about',
+        },
+        {
+          heading: 'Get a Custom Quote',
+          body: "Tell us your product, quantity, and destination — we'll get back with a quote.",
+          href: '/contact',
+        },
+      ],
+    },
     newsletter: {
       heading: 'Ready to Source Sustainably?',
       body:
@@ -160,17 +233,15 @@ const PAGES = {
   },
   gallery: {
     intro:
-      'Real photos of our production unit, packaging process, and product samples will replace these placeholders once supplied.',
+      'A look at the raw material, the pressing process, and the finished tableware. Real facility and packaging photos will be added as they become available.',
     items: [
-      'Production unit — exterior',
-      'Production unit — leaf pressing',
-      'Quality inspection',
-      'Packaging process',
-      'Packed cartons ready for export',
-      'Product sample — plates',
-      'Product sample — bowls',
-      'Product sample — cups',
-      'Team at work',
+      { label: 'Areca palm leaves — raw material', image: '/images/hero-leaves.jpg' },
+      { label: 'Leaf plate press machine in operation', image: '/images/press.jpg' },
+      { label: 'Round plates — finished product', image: '/images/plate-round.jpg' },
+      { label: 'Square plates & bowls', image: '/images/plate-square.jpg' },
+      { label: 'Wooden cutlery set', image: '/images/cutlery.jpg' },
+      { label: 'Compostable paper cups', image: '/images/cup.png' },
+      { label: 'Packaging & export cartons', image: '/images/boxes.jpg' },
     ],
   },
 };
@@ -200,6 +271,12 @@ async function seedProducts(conn) {
     if (product.variants && product.variants.length > 0) {
       const values = product.variants.map((v) => [productId, v.size || null, v.shape || null]);
       await conn.query('INSERT INTO product_variants (product_id, size, shape) VALUES ?', [values]);
+    }
+
+    await conn.query('DELETE FROM product_images WHERE product_id = ?', [productId]);
+    if (product.images && product.images.length > 0) {
+      const values = product.images.map((img, i) => [productId, img.image_path, i]);
+      await conn.query('INSERT INTO product_images (product_id, image_path, sort_order) VALUES ?', [values]);
     }
 
     console.log(`Product ready: ${product.name}`);

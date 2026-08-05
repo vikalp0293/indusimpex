@@ -6,8 +6,10 @@ import CategoryNav from "@/components/CategoryNav";
 import ProductGrid from "@/components/ProductGrid";
 import StatsSection from "@/components/StatsSection";
 import MissionSection from "@/components/MissionSection";
+import AlternatingFeature from "@/components/AlternatingFeature";
 import TrustBadges from "@/components/TrustBadges";
 import WhySourceSection from "@/components/WhySourceSection";
+import ExploreTiles from "@/components/ExploreTiles";
 import NewsletterBand from "@/components/NewsletterBand";
 
 // Fallback copy — used only if the "home" row in the `pages` table hasn't
@@ -20,9 +22,11 @@ const HOME_FALLBACK = {
       "Areca leaf plates and expanding eco-friendly tableware — naturally fallen leaves, no trees cut, fully biodegradable.",
   },
   stats: { items: [], note: null },
+  story: { eyebrow: "", heading: "", body: "", ctaLabel: "", ctaHref: "/about" },
   mission: { heading: "Our Mission", body: "", foundingYear: null },
   trustBadges: [],
   whySource: [],
+  exploreTiles: { heading: "", tiles: [] },
   newsletter: { heading: "Ready to Source Sustainably?", body: "", ctaLabel: "Request a Quote" },
 };
 
@@ -78,6 +82,12 @@ export default async function Home() {
         <StatsSection {...content.stats} />
       </AnimatedSection>
 
+      {content.story?.heading && (
+        <AnimatedSection>
+          <AlternatingFeature {...content.story} image="/images/press.jpg" />
+        </AnimatedSection>
+      )}
+
       <AnimatedSection>
         <MissionSection {...content.mission} />
       </AnimatedSection>
@@ -88,6 +98,10 @@ export default async function Home() {
 
       <AnimatedSection>
         <WhySourceSection reasons={content.whySource} />
+      </AnimatedSection>
+
+      <AnimatedSection>
+        <ExploreTiles {...content.exploreTiles} />
       </AnimatedSection>
 
       <AnimatedSection>
